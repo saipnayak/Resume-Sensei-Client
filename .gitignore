@@ -1,1 +1,5 @@
 node_modules/
+
+
+git config --local user.name "Sai Prasad Nayak"
+git config --local user.email "saiprasadnayak507@gmail.com"

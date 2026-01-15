@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import ResumeService from "./services/ResumeService";
+
+
 import ResultSection from "./components/ResultSection";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf";
+import { analyzeResume } from "./services/ResumeService";
+
 
 export default function App() {
   const [resumeText, setResumeText] = useState("");
@@ -10,25 +13,27 @@ export default function App() {
   const [result, setResult] = useState(null);
 
   const handleAnalyze = async () => {
-    setError(null);
-    setResult(null);
-    if (!resumeText.trim()) {
-      setError("Please paste your resume text before analyzing.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await ResumeService.analyzeResume(resumeText);
-      setResult(data);
-    } catch (err) {
-      console.error(err);
-      const message =
-        err?.response?.data?.message || err.message || "Request failed";
-      setError(`Analysis failed: ${message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setError(null);
+  setResult(null);
+
+  if (!resumeText.trim()) {
+    setError("Please paste your resume text before analyzing.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const response = await analyzeResume(resumeText);
+    setResult(response.data);
+  } catch (err) {
+    console.error(err);
+    const message =
+      err?.response?.data?.message || err.message || "Request failed";
+    setError(`Analysis failed: ${message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div

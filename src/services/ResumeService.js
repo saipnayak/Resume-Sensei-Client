@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-  baseURL: "http://localhost:8080"
+  baseURL: "https://resume-sensei-backend.onrender.com/"
 });
 
 export const analyzeResume = (resumeText) => {

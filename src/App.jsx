@@ -1,32 +1,37 @@
-import { GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf";
-GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+
 
 import React, { useState } from "react";
 import Loader from "./components/Loader";
 import ResultSection from "./components/ResultSection";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf";
-import { analyzeResume } from "./services/ResumeService";
 
+import { analyzeResume } from "./services/ResumeService";
 
 
 export default function App() {
   const [resumeText, setResumeText] = useState("");
+  const [file, setFile] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
 
-  const handleFileChange = async (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
+  const handleFileChange = (e) => {
+  setError(null);
+  const selectedFile = e.target.files?.[0];
+  if (!selectedFile) return;
 
-    setFile(selectedFile);
+  if (selectedFile.type !== "application/pdf") {
+    setError("Only PDF files are supported.");
+    return;
+  }
+  setFile(selectedFile);
+};
 
-  const handleAnalyze = async () => {
-    if (!resumeText && !file) {
-      setError("Please paste resume text or upload a PDF");
-      return;
-    }
+const handleAnalyze = async () => {
+  if (!resumeText && !file) {
+    setError("Please paste resume text or upload a PDF.");
+    return;
+  }
 
   setLoading(true);
   setError(null);
@@ -36,11 +41,12 @@ export default function App() {
     const response = await analyzeResume(resumeText, file);
     setResult(response.data);
   } catch (err) {
+    console.error(err);
     setError(err.response?.data?.message || "Analysis failed");
   } finally {
-    setLoading(false);
+    setLoading(false);  
   }
-}};
+};
 
   return (
     <div
@@ -112,32 +118,25 @@ export default function App() {
                 className="w-full min-h-[140px] p-3 border border-gray-200 rounded-md text-sm mb-4"
               />
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-3">
                 <button
-                  onClick={handleAnalyze}
-                  disabled={loading}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-60"
+                onClick={handleAnalyze}
+                disabled={loading}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-60"
                 >
-                </button>
-                <div className="mt-6">
-                   {loading && <Loader />}
-                   {error && (
-                    <p className="text-red-500 mt-4">{error}</p>
+                  {loading ? "Analyzing..." : "Analyze Resume"}
+                  </button>
+                  {loading && <Loader />}
+                  {error && (
+                    <p className="text-red-500 text-sm">{error}</p>
                     )}
-                    </div>
-                
-
-                 {error && (
-                   <p className="text-red-500 mt-4">{error}</p>
-                   )}
-                   {result && (
-                    <ResultSection result={result} />
-                    )}
-                <span className="text-sm text-gray-500">
-                  {error ? <span className="text-red-600">{error}</span> : ""}
-                </span>
-              </div>
-            </div>
+                    {!loading && !error && (
+                      <p className="text-sm text-gray-500">
+                        Analysis may take up to 60 seconds
+                        </p>
+                      )}
+                      </div>
+                      </div>
 
             {/* Right column */}
             <div className="md:w-3/5 p-8">

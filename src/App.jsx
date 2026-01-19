@@ -1,4 +1,6 @@
 import { GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf";
+GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 import React, { useState } from "react";
 import Loader from "./components/Loader";
@@ -7,8 +9,7 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf";
 import { analyzeResume } from "./services/ResumeService";
 
 
-GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
 export default function App() {
   const [resumeText, setResumeText] = useState("");
   const [loading, setLoading] = useState(false);

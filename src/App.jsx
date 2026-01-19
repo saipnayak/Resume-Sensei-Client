@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-
-
+import Loader from "./components/Loader";
 import ResultSection from "./components/ResultSection";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf";
 import { analyzeResume } from "./services/ResumeService";

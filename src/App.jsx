@@ -1,3 +1,5 @@
+import { GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf";
+
 import React, { useState } from "react";
 import Loader from "./components/Loader";
 import ResultSection from "./components/ResultSection";
@@ -5,34 +7,39 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf";
 import { analyzeResume } from "./services/ResumeService";
 
 
+GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 export default function App() {
   const [resumeText, setResumeText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
 
+  const handleFileChange = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+
   const handleAnalyze = async () => {
+    if (!resumeText && !file) {
+      setError("Please paste resume text or upload a PDF");
+      return;
+    }
+
+  setLoading(true);
   setError(null);
   setResult(null);
 
-  if (!resumeText.trim()) {
-    setError("Please paste your resume text before analyzing.");
-    return;
-  }
-
-  setLoading(true);
   try {
-    const response = await analyzeResume(resumeText);
+    const response = await analyzeResume(resumeText, file);
     setResult(response.data);
   } catch (err) {
-    console.error(err);
-    const message =
-      err?.response?.data?.message || err.message || "Request failed";
-    setError(`Analysis failed: ${message}`);
+    setError(err.response?.data?.message || "Analysis failed");
   } finally {
     setLoading(false);
   }
-};
+}};
 
   return (
     <div
@@ -77,31 +84,16 @@ export default function App() {
                 id="file"
                 type="file"
                 accept="application/pdf"
-                onChange={async (e) => {
+                onChange={(e) => {
                   setError(null);
-                  const file = e.target.files && e.target.files[0];
-                  if (!file) return;
-                  if (file.type !== "application/pdf") {
-                    setError("Only PDF files are supported for upload.");
+                  const selectedFile = e.target.files?.[0];
+                  if (!selectedFile) return;
+                  if (selectedFile.type !== "application/pdf") {
+                    setError("Only PDF files are supported.");
                     return;
                   }
-                  try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const loadingTask = getDocument({ data: arrayBuffer });
-                    const pdf = await loadingTask.promise;
-                    let text = "";
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                      const page = await pdf.getPage(i);
-                      const content = await page.getTextContent();
-                      const strs = content.items.map((item) => item.str || "");
-                      text += strs.join(" ") + "\n\n";
-                    }
-                    setResumeText(text);
-                  } catch (err) {
-                    console.error(err);
-                    setError("Failed to extract text from PDF.");
-                  }
-                }}
+                  setFile(selectedFile); 
+                  }}
                 className="block w-full text-sm text-gray-700 mb-4"
               />
 
@@ -125,8 +117,21 @@ export default function App() {
                   disabled={loading}
                   className="bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-60"
                 >
-                  {loading ? "Analyzing..." : "Analyze Resume"}
                 </button>
+                <div className="mt-6">
+                   {loading && <Loader />}
+                   {error && (
+                    <p className="text-red-500 mt-4">{error}</p>
+                    )}
+                    </div>
+                
+
+                 {error && (
+                   <p className="text-red-500 mt-4">{error}</p>
+                   )}
+                   {result && (
+                    <ResultSection result={result} />
+                    )}
                 <span className="text-sm text-gray-500">
                   {error ? <span className="text-red-600">{error}</span> : ""}
                 </span>

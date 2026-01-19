@@ -183,7 +183,7 @@ export default function App() {
                     setError(null);
                     setView("INPUT");
                   }}
-                  className="bg-indigo-600 mt-2 px-4 py-2 rounded-md text-sm text-white hover:bg-indigo-400"
+                  className="bg-indigo-600 mt-2 px-4 py-2 rounded-md text-sm text-white hover:bg-indigo-800"
                 >
                   + New
                 </button>
@@ -257,7 +257,9 @@ export default function App() {
                 <ResultSection title="Strengths">
                   <ul className="list-disc pl-5">
                     {result.strengths.map((s, i) => (
-                      <li key={i}>{s}</li>
+                      <li key={i} className="mb-1">
+                        {s}
+                      </li>
                     ))}
                   </ul>
                 </ResultSection>
@@ -265,7 +267,7 @@ export default function App() {
                 <ResultSection title="Improvements">
                   <ul className="list-disc pl-5">
                     {result.improvements.map((s, i) => (
-                      <li key={i}>{s}</li>
+                      <li key={i} className="mb-1">{s}</li>
                     ))}
                   </ul>
                 </ResultSection>
